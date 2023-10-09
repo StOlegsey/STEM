@@ -10,7 +10,13 @@ public class StemApplication {
         SpringApplication.run(StemApplication.class, args);
 
         Iteration iteration = new Iteration();
-        iteration.generateCombinations(0,0, 0);
+        double[] firstIter = iteration.IterationSolvation();
+
+        System.out.println("Затраты: " + firstIter[0]);
+        System.out.println("Безопасность: " + firstIter[1]);
+        System.out.println("Комфортабельность: " + firstIter[2]);
+        System.out.println("Гланый критерий: " + firstIter[3]);
+
     }
 
 
