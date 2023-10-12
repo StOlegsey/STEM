@@ -10,7 +10,7 @@ import java.util.Collection;
 
 public class Lambdas {
 
-    private double[][] normMatrix;
+    private final double[][] normMatrix;
 
     public Lambdas(double[][] normMatrix) {
         this.normMatrix = normMatrix;
