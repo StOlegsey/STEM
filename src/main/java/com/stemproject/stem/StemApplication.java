@@ -9,7 +9,7 @@ public class StemApplication {
     public static void main(String[] args) {
         SpringApplication.run(StemApplication.class, args);
 
-        Iteration iteration = new Iteration(10);
+        Iteration iteration = new Iteration(5);
         iteration.IterationSolvation();
 
 

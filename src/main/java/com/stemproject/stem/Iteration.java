@@ -14,18 +14,20 @@ public class Iteration {
         this.maxIterations = maxIterations;
     }
 
-    public Iteration(Integer maxIterations, Integer iterationNumber, String P_Past, double P_AvgPast) {
+    public Iteration(Integer maxIterations, Integer iterationNumber, String P_Past, double P_AvgPast, double[][] minMaxValues) {
         this.maxIterations = maxIterations;
         this.iterationNumber = iterationNumber;
         this.P_Past = P_Past;
         this.P_AvgPast = P_AvgPast;
+        this.minMaxValues = minMaxValues;
     }
 
     final Integer maxIterations;
     Integer iterationNumber = 1;
     final Integer MatrixSize = 12;
-     String P_Past = null;
-     double P_AvgPast = 0.0;
+    String P_Past = null;
+    double P_AvgPast = 0.0;
+    double[][] minMaxValues = new double[3][3];
     InputValues inputValues = new InputValues();
     //Z - Затраты, B - безопасность, K - комфортабельность
     Map<String, double[]> Yd = inputValues.getYd();
@@ -90,8 +92,7 @@ public class Iteration {
         if(iterationNumber!=1){ //если итерация не первая, добавляем условие на оптимальный критерий
             Relationship rel = Relationship.GEQ;
             if(P_AvgPast<0) rel = Relationship.LEQ;
-
-                constraints.add(new LinearConstraint(Yd.get(P_Past),
+            constraints.add(new LinearConstraint(Yd.get(P_Past),
                         rel, Math.abs(P_AvgPast)));
         }
 
@@ -131,18 +132,6 @@ public class Iteration {
                 }
             }
         }
-
-        /*if(iterationNumber==2){
-            System.out.println(P);
-            for(int i =0;i<12;i++){
-                System.out.print(solution[i]+" ");
-            }
-            System.out.println("\n");
-            System.out.println(Pcol[0]);
-            System.out.println(Pcol[1]);
-            System.out.println(Pcol[2]);
-        }*/
-
         return Pcol;
     }
 
@@ -175,16 +164,17 @@ public class Iteration {
     public double[] IterationSolvation(){
 
         double[] cols = getAllColumnForP("P", GoalType.MAXIMIZE, true);
-        double[][] minMax = new double[3][2];
         double[] maxVars = new double[3];
 
         for(int i =0;i<3;i++){
-            minMax[i][0] = Collections.min(Arrays.asList(optMatrix[0][i],optMatrix[1][i],optMatrix[2][i]));
-            minMax[i][1] = Collections.max(Arrays.asList(optMatrix[0][i],optMatrix[1][i],optMatrix[2][i]));
-            maxVars[i] = minMax[i][1] - cols[i];//удаленность от макимального значения до полученного
-            //System.out.println(minMax[i][0]+" - "+minMax[i][1]);
+            if(iterationNumber==1) {    //убрать условие, чтобы диапазон для оптимального критерия находился исходя из этой итерации
+                minMaxValues[i][0] = Collections.min(Arrays.asList(optMatrix[0][i], optMatrix[1][i], optMatrix[2][i]));
+                minMaxValues[i][1] = Collections.max(Arrays.asList(optMatrix[0][i], optMatrix[1][i], optMatrix[2][i]));
+            }
+            maxVars[i] = minMaxValues[i][1] - cols[i];//удаленность от макимального значения до полученного
+
             if(i!=0){   //сравниваем относительно затрат
-                maxVars[i] /= (minMax[i][1]-minMax[i][0])/(minMax[0][1]-minMax[0][0]);
+                maxVars[i] /= (minMaxValues[i][1]-minMaxValues[i][0])/(minMaxValues[0][1]-minMaxValues[0][0]);
             }
         }
 
@@ -194,7 +184,7 @@ public class Iteration {
         }
 
         String PofMax = max == 0 ? "Z": max == 1 ? "B": "K";
-        double P_Avg = (cols[max]+minMax[max][1])/2;
+        double P_Avg = (cols[max]+minMaxValues[max][1])/2;
 
         System.out.println("\nИтерация: "+ iterationNumber+" из "+maxIterations+"\n");
 
@@ -213,7 +203,7 @@ public class Iteration {
         System.out.println("Критерий для оптимизации: " + PofMax+" Пороговое значение: "+P_Avg);
 
         if(!iterationNumber.equals(maxIterations)) {
-            Iteration iteration = new Iteration(maxIterations, iterationNumber+1,PofMax,P_Avg);
+            Iteration iteration = new Iteration(maxIterations, iterationNumber+1,PofMax,P_Avg, minMaxValues);
             iteration.IterationSolvation();
         }
 
