@@ -211,7 +211,7 @@ public class Iteration {
             System.out.println("Главный критерий: " + String.format("%.4f",cols[3]));
 
             writer.append("\nЗатраты: " + String.format("%.4f",cols[0])+"\n");
-            writer.append("Безопасность: " + String.format("%.4f",cols[1])+"\n");
+            writer.append("Безопасность: "+String.format("%.4f", cols[1])+"\n");
             writer.append("Комфортабельность: " + String.format("%.4f",cols[2])+"\n");
             writer.append("Главный критерий: " + String.format("%.4f",cols[3])+"\n");
             writer.flush();
